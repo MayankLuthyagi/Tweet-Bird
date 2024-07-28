@@ -14,7 +14,9 @@
             >
             <template v-slot:before>
               <q-avatar size="xl">
-                <img src="src/assets/Photo.png">
+                <q-img src="src/assets/Photo.png"
+                error-src="https://thumbs.dreamstime.com/b/photo-document-passport-id-mature-caucasian-man-suit-white-shirt-126121929.jpg">
+              </q-img>
               </q-avatar>
             </template>
           </q-input>
@@ -46,8 +48,10 @@
           >
             <q-item-section avatar>
               <q-avatar size="xl">
-                  <img src="src/assets/Photo.png">
-                </q-avatar>
+                <q-img src="src/assets/Photo.png"
+                error-src="https://thumbs.dreamstime.com/b/photo-document-passport-id-mature-caucasian-man-suit-white-shirt-126121929.jpg">
+              </q-img>
+              </q-avatar>
             </q-item-section>
 
             <q-item-section>
