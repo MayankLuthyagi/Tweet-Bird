@@ -1,6 +1,6 @@
 <template>
   <q-page class ="relative-position">
-    <q-scroll-area class="absolute fullscreen">
+    <q-scroll-area class="absolute full-width full-height">
       <div class = "q-py-lg q-px-md row items-end q-col-gutter-md">
         <div class="col">
           <q-input
@@ -14,7 +14,7 @@
             >
             <template v-slot:before>
               <q-avatar size="xl">
-                <img src="src/assets/Photo.jpg">
+                <img src="src/assets/Photo.png">
               </q-avatar>
             </template>
           </q-input>
@@ -41,12 +41,12 @@
         >
           <q-item
           v-for="tweet in Tweet"
-          :key="tweet.date"
+          :key="tweet.id"
           class="tweet q-py-md"
           >
             <q-item-section avatar>
               <q-avatar size="xl">
-                  <img src="src/assets/Photo.jpg">
+                  <img src="src/assets/Photo.png">
                 </q-avatar>
             </q-item-section>
 
@@ -64,7 +64,14 @@
               <div class="tweet-icon row justify-between q-mt-sm">
                 <q-btn flat round color="grey" icon="far fa-comment" size="sm"/>
                 <q-btn flat round color="grey" icon="fas fa-retweet" size="sm"/>
-                <q-btn flat round color="grey" icon="far fa-heart" size="sm"/>
+                <q-btn
+                  @click = "toggledLiked(tweet)"
+                  flat
+                  round
+                  :color="tweet.liked ? 'red' : 'grey' "
+                  :icon="tweet.liked ? 'fas fa-heart' : 'far fa-heart'"
+                  size="sm"
+                />
                 <q-btn @click = "deleteTweet(tweet)" flat round color="grey" icon="far fa-trash" size="sm"/>
               </div>
             </q-item-section>
@@ -73,9 +80,11 @@
       </q-list>
   </q-scroll-area>
   </q-page>
-</template>g
+</template>
 
 <script>
+import { collection, doc, updateDoc, deleteDoc, onSnapshot, orderBy, addDoc, query } from 'firebase/firestore'
+import db from 'src/boot/firebase'
 import { formatDistance } from 'date-fns'
 export default {
   name: 'PageHome',
@@ -84,12 +93,10 @@ export default {
       newTweet: '',
       Tweet: [
         {
-          content: ' Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tenetur nisi ullam consequuntur et quo eius sit veritatis optio odio eos dignissimos similique sapiente, natus saepe quas dolores illum. Similique, beatae.',
-          date: 1720661119159
-        },
-        {
-          content: ' Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tenetur nisi ullam consequuntur et quo eius sit veritatis optio odio eos dignissimos similique sapiente, natus saepe quas dolores illum. Similique, beatae.',
-          date: 1720661133275
+          id: 'ID1',
+          content: 'First Tweet From VS && Heart Not Updated in this Tweet',
+          date: 1719748951125,
+          liked: true
         }
       ]
     }
@@ -98,20 +105,63 @@ export default {
     formatRelativeDate (value) {
       return formatDistance(new Date(value), new Date())
     },
-    addNewTweet () {
-      const addTweet = {
+    async addNewTweet () {
+      if (this.newTweet.trim() === '') return
+
+      const tweetData = {
         content: this.newTweet,
-        date: Date.now()
+        date: Date.now(),
+        liked: false
       }
-      this.Tweet.unshift(addTweet)
-      this.newTweet = ''
+      try {
+        await addDoc(collection(db, 'tweet'), tweetData)
+        this.newTweet = ''
+      } catch (error) {
+        console.error('Error adding new tweet:', error)
+      }
     },
-    deleteTweet (tweet) {
-      const dateToDelete = tweet.date
-      const index = this.Tweet.findIndex(tweet => tweet.date === dateToDelete)
-      console.log('index:', index)
-      this.Tweet.splice(index, 1)
+    async toggledLiked (tweet) {
+      try {
+        await updateDoc(doc(db, 'tweet', tweet.id), {
+          liked: !tweet.liked
+        })
+        console.log('Tweet like status updated successfully!')
+      } catch (error) {
+        console.error('Error updating tweet like status:', error)
+      }
+    },
+    async deleteTweet (tweet) {
+      try {
+        const tweetDocRef = doc(db, 'tweet', tweet.id)
+        await deleteDoc(tweetDocRef)
+        console.log('Document successfully deleted!')
+      } catch (error) {
+        console.error('Error removing document:', error)
+      }
     }
+  },
+  mounted () {
+    const tweetsCollection = collection(db, 'tweet')
+    const tweetsQuery = query(tweetsCollection, orderBy('date'))
+    // Use onSnapshot with the query to listen for changes
+    onSnapshot(tweetsQuery, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        const tweetChange = { id: change.doc.id, ...change.doc.data() }
+        if (change.type === 'added') {
+          console.log('New Tweet : ', tweetChange, tweetChange.id)
+          this.Tweet.unshift(tweetChange)
+        }
+        if (change.type === 'modified') {
+          console.log('Modified Tweet : ', tweetChange)
+          const index = this.Tweet.findIndex(tweet => tweet.id === tweetChange.id)
+          Object.assign(this.Tweet[index], tweetChange)
+        }
+        if (change.type === 'removed') {
+          console.log('Removed Tweet:', tweetChange)
+          this.Tweet = this.Tweet.filter(tweet => tweet.id !== tweetChange.id)
+        }
+      })
+    })
   }
 }
 </script>
