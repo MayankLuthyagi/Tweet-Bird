@@ -3,7 +3,7 @@ import { getFirestore } from 'firebase/firestore'
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: 'AIzaSyAWSPcNeRVzCbXx6ixQbnDUN3uzOg3lcRI',
+  apiKey: 'google_api_key',
   authDomain: 'twitter-clone-7f196.firebaseapp.com',
   projectId: 'twitter-clone-7f196',
   storageBucket: 'twitter-clone-7f196.appspot.com',
