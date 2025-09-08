@@ -10,6 +10,7 @@
          communities, and Spaces, a social audio feature. Users can vote on context added by approved users using the Community
          Notes feature.
       </p>
+      
       <p>Twitter was created in March 2006 by Jack Dorsey, Noah Glass, Biz Stone, and Evan Williams, and was launched in
         July of that year. Twitter grew quickly; by 2012 more than 100 million users produced 340 million tweets per day.[7]
         Twitter, Inc., was based in San Francisco, California, and had more than 25 offices around the world.[8] A signature
